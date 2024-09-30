@@ -1,0 +1,33 @@
+cd()
+{
+    if [ -f .exitrc ]; then
+        source .exitrc
+    else
+        cat > .exitrc<<EOF 
+#!/bin/bash
+
+# commands will be executed when leaving directory
+echo "bye!"
+EOF
+        chmod a+x .exitrc
+    fi
+
+    if [ -z $* ]; then
+        builtin cd ~
+    else
+        builtin cd "$*"
+    fi
+
+    if [ -f .enterrc ]; then
+        source .enterrc;
+    else
+        cat > .enterrc<<EOF 
+#!/bin/bash
+
+# commands will be executed when enter directory
+ echo "hi!"
+EOF
+        chmod a+x .enterrc
+    fi
+}
+
