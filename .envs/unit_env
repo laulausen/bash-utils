@@ -1,0 +1,53 @@
+#!/bin/bash -a
+echo "logging = $logging"
+. $logging
+BIN_DIR=/ssd/navcore/bin
+
+ENV_TYPE=unit_env
+log I "set environment to $ENV_TYPE"
+AOSP_SRC=
+PRODUCT=
+LUNCH_TYPE=
+VARIANT=
+GO_ON="1"
+case "$ENV_TYPE" in
+	emu*)
+		VARIANT="userdebug"
+		[ -z "$1" ] || VARIANT=$1
+		LUNCH_TYPE="OIA__AU_MRM_X__E-$VARIANT"
+		AOSP_SRC=$A14_emu
+		PRODUCT="oia_emu"
+		[ -z "$A14_emu" ] && GO_ON=
+		;;
+	unit*)
+		VARIANT="userdebug"
+		[ -z "$1" ] || VARIANT=$1
+		LUNCH_TYPE="OIA__AU_MRM_S__U-$VARIANT"
+		AOSP_SRC=$A14_unit
+		PRODUCT="oia_vm"
+		[ -z "$A14_unit" ] && GO_ON=
+		;;
+	*)
+		log E "$0 unknown...choose emu_env or unit_env"; GO_ON=
+		;;
+esac
+
+if [ $GO_ON ]; then
+export AOSP_SRC=$AOSP_SRC
+export TOP=$AOSP_SRC
+export PRODUCT=$PRODUCT
+# ADDING AOSP BUILD TOOLS, eg m mma... targets..." >> $TMP_env
+. $AOSP_SRC/build/envsetup.sh
+cd $AOSP_SRC && lunch $LUNCH_TYPE
+# set PRODUCT_OUT_DIR" >> $TMP_env
+# export PRODUCT_OUT="$AOSP_SRC/out/target/product/$PRODUCT"
+# ADDING AOSP TOOLS, eg aidl hidl..." >> $TMP_env
+export PATH="$PATH:$AOSP_SRC/out/host/linux-x86/bin"
+# set HAL_DIR" >> $TMP_env
+export HAL="$AOSP_SRC/vendor/esolutions/hal"
+cd $HAL
+[ -e $HAL/out ] && rm $HAL/out
+ln -s $AOSP_SRC/out $HAL/out
+cd $TOP
+fi
+

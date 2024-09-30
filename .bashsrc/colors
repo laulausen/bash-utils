@@ -1,0 +1,17 @@
+#!/bin/bash
+a_COLORS=( GRAY RED GREEN YELLOW BLUE PURPURE CYAN WHITE )
+color_count=${#a_COLORS[@]}
+i=0
+LAST=
+NONE='\033[0m'
+while [ $i -lt $color_count ]; do
+  NORM='\033[0;9'${i}'m'
+  BOLD='\033[1;9'${i}'m'
+  COLOR=${a_COLORS[$i]}
+  COLOR_BOLD="${COLOR}_BOLD"
+  eval "export ${COLOR}=\"${NORM}\"" 
+  eval "export ${COLOR_BOLD}=\"${BOLD}\""
+  [ "$1" = "-p" ] && printf "%d : ${NORM}%10s${NONE} <--> ${BOLD} %s ${NONE}\n" $i "$COLOR" "$COLOR_BOLD"
+  i=$((i+1))
+done
+export COLORS_SET=1

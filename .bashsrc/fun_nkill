@@ -1,0 +1,21 @@
+#!/bin/bash
+function nkill() {
+    TAG="FUN nkill"
+    pname="$1"
+    pids=""
+    pid=""
+    pi=""
+    for p in $(sed -E -e "s# +# #g"<<<"$(ps aux | grep "$pname" )" | cut -d' ' -f2); do
+        [[ "$p" =~ [0-9]+ ]] || return
+        pids="${pids}${pid} "
+        pid=$pi;
+        pi=$p;
+    done
+    [ ! "$pid" = "" ] && pids="${pids}${pid}"
+    [ ! "$(sed -E -e "s# +##g" <<<"$pids")" = "" ] && {
+        flag="1";
+        printf "kill : %s?" "$(for p in "$pids"; do printf "%b " $p; done )";
+        read -r a;
+        sudo kill -9 $pids 1> /dev/null;
+    } || log W "no matching process found"
+}

@@ -1,4 +1,6 @@
-cd()
+#!/bin/bash
+
+function cd()
 {
     if [ -f .exitrc ]; then
         source .exitrc

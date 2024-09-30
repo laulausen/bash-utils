@@ -1,0 +1,38 @@
+#!/bin/bash
+
+###################################################################################################
+###################################################################################################
+export TAG="CORE_BASH"
+
+[ -z "$PATH_BACKUP" ] && export PATH_BACKUP="$PATH"
+
+export CORE=/ssd/navcore
+export CORE_BIN=$CORE/bin
+export CORE_SBIN=$CORE/.sbin
+export CORE_SRC=$CORE/.bashsrc
+export BASHSRC=$CORE_SRC
+export CORE_TOOLS=$CORE/CORE_TOOLS
+export PLATFORM_TOOLS=$CORE_BIN/platform-tools
+export AOSP_HOST_TOOLS=$CORE_BIN/aosp_host_tools
+export AOSP_TOOLING=$CORE_TOOLS/AOSP-tool/scan/tooling
+
+MY_BASH_SRC=( BASHSRC )
+for src in ${MY_BASH_SRC[@]}; do
+  . $src
+done
+
+MY_PATHES=( PLATFORM_TOOLS AOSP_HOST_TOOLS AOSP_TOOLING CORE_BIN)
+MY_PATH=
+for path in ${MY_PATHES[@]}; do
+  [ -e "${!path}" ] && MY_PATH="${!path}:${MY_PATH}"
+done;
+export PATH="$MY_PATH:$PATH_BACKUP"
+
+[ -e $CORE/workspace/latest_A13_XE ] && export A13_emu=$CORE/workspace/$(cat $CORE/workspace/latest_A13_XE)/aosp
+[ -e $CORE/workspace/latest_A13_SU ] && export A13_unit=$CORE/workspace/$(cat $CORE/workspace/latest_A13_SU)/aosp
+[ -e $CORE/workspace/latest_A14_XE ] && export A14_emu=$CORE/workspace/$(cat $CORE/workspace/latest_A14_XE)/aosp
+[ -e $CORE/workspace/latest_A14_SU ] && export A14_unit=$CORE/workspace/$(cat $CORE/workspace/latest_A14_SU)/aosp
+
+export VICS=$CORE/JOB_STORAGE/VICS_ETC_2
+export unit_env=". $CORE_ENVS/unit_env"
+export emu_env=". $CORE_ENVS/emu_env"

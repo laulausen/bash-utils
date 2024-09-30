@@ -1,0 +1,6 @@
+#!/bin/bash
+
+
+print_env() {
+    ( set -o posix ; set ) | less 
+}
