@@ -3,7 +3,7 @@
 cd $HOME
 git clone https://raw.githubusercontent.com/laulausen/bash-utils.git
 cd bash-utils
-cp $HOME/.bashrc $HOME/._bashrc
+[ -f $HOME/.bashrc ] && cp $HOME/.bashrc $HOME/._bashrc
 cat << "EOF" >> $HOME/.bashrc
 export BASH_HOME="$HOME"
 export BASH_USER="GOD"
@@ -85,7 +85,9 @@ fi
 [ -f $BASH_HOME/.bash_logo ] && . $BASH_HOME/.bash_logo
 EOF
 
-cp -r .bash_logo .bash_aliases .bash_envs .bashsrc .sbin bin $HOME/
+cp -r .bash_logo .bash_aliases .bash_envs .bashsrc $HOME/
+[ -d $HOME/.sbin ] || mkdir $HOME/.sbin
+[ -d $HOME/bin ] || mkdir $HOME/bin
 cd $HOME
 echo "now type \". ./.bashrc\""
 
