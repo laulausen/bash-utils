@@ -1,45 +1,37 @@
 #!/bin/bash
+
 log() {
-  TAG=$TAG
-  [ -z "$COLORS_SET" ] && . $BASHSRC/colors
-  [ -z "$LINENR" ] && LINENR=$(printf %04d ${BASH_LINENO[0]})
-  [ -z "$SCRIPT" ] && SCRIPT="${BASH_SOURCE[1]}"
-  [ -z "$TAG" ] && {
-        [ -z "$SCRIPT" ] && TAG="" || TAG=$(basename ${SCRIPT})
-  }
-  VARS_TO_UNSET="LINENR SCRIPT"
+  VARS_TO_UNSET=""
+  if [ -z ${a_COLORS} ];then
+    a_COLORS=( GRAY RED GREEN YELLOW BLUE PURPURE CYAN WHITE )
+    i=0
+    while [ "$i" -lt 8 ]; do
+      COL=${a_COLORS[$i]}; VAL="'1;9$i'"
+      VAL_="'\033[1;9${i}m'"
+      eval "$COL=$VAL_"
+      COL_B=${COL}_BOLD; VAL_b="0;9$((i+1))"
+      COL_B_="\033["
+      COL_B_="'${COL_B_}${VAL_b}m'"
+      eval "$COL_B=$COL_B_"
+      i=$((i+1))
+    done
+    BLACK='\033[0m'
+  fi
   ## log levels ##
-  I="INFO"
-  V="VERBOSE"
-  D="DEBUG"
-  E="ERROR"
-  W="WARN"
-  INFO=$GREEN
-  VERBOSE=$GRAY
-  DEBUG=$WHITE
-  ERROR=$RED
-  WARN=$YELLOW
+  I=$GREEN
+  V=$LIGHT_BLUE
+  D=$LIGHT_GREY
+  E=$RED
+  W=$ORANGE
   [ -z "$LOG_LEVEL" ] && LOG_LEVEL="DEBUG"
-  LEVEL=${!1}
-  COLOR=${!LEVEL}
-  margin() {
-      size=$1
-      i=0 
-      MARGIN=""
-      while ((i<size)); do     
-          MARGIN="$MARGIN "
-          i=$((i+1))
-      done
-      echo "$MARGIN"
-  }
-  LEVEL_MAX_LENGTH=7
-  LEVEL_LENGTH=${#LEVEL}; diff=$((LEVEL_MAX_LENGTH - LEVEL_LENGTH)); MARGIN_RIGHT=$((diff/2)); MARGIN_LEFT=$(( MARGIN_RIGHT + ( diff%2 ) ));
-  LEVEL="$(printf "${GRAY_BOLD}[$(margin $MARGIN_LEFT)${NONE}${COLOR}%s$(margin $MARGIN_RIGHT)${NONE}${GRAY_BOLD}]${NONE}" "${LEVEL}")"
+
+  COLOR=${!1}
+  LEVEL=$1
   LEVELS=""
   VARS_TO_UNSET="$VARS_TO_UNSET COLOR LEVEL LEVELS"
   case "$LOG_LEVEL" in
         INFO)
-                LEVELS="I E";
+                LEVELS="I E"
                 ;;
         VERBOSE)
                 LEVELS="I V E W"
@@ -51,16 +43,14 @@ log() {
                 LEVELS="E"
                 ;;
         WARN)
-                LEVELS="E I W";
+                LEVELS="E I W"
                 ;;
         QUIET)
                 LEVELS=""
                 ;;
   esac
-  h=':'
-  MTAG="$(printf "${WHITE}%10s${NONE}${GRAY_BOLD}${h}${LINENR}${NONE}" "${TAG}")"
 
-  if [ ! -z "$(echo $LEVELS | grep $1)" ]; then
+  if [ ! -z "$(echo $LEVELS | grep $LEVEL)" ]; then
         [ -n $SSH_TTY ] && LOG_DEST=$SSH_TTY || LOG_DEST=/dev/fd/1
         ma=""
         args=( "$@" )
@@ -72,7 +62,7 @@ log() {
                 }
                 j=$((j+1))
         done
-        ( printf "    $MTAG $LEVEL  ::  ${COLOR}${ma}${NONE} \n" > $LOG_DEST ) 2> /dev/null || printf "    $MTAG $LEVEL  ::  ${COLOR}${ma}${NONE} \n" > /dev/fd/1
+        ( printf "    ${WHITE}[ ${YELLOW}${LEVEL} ${WHITE}] ${BLACK}: ${COLOR}${ma}${BLACK} \n" > $LOG_DEST ) 2> /dev/null || printf "    ${WHITE}[ ${YELLOW}${LEVEL} ${WHITE}] ${BLACK}: ${COLOR}${ma}${BLACK} \n" > /dev/fd/1
   fi
   [ $WITH_EXIT ] && [ "$LEVEL" = "E" ] && [[ $status =~ ^[0-9]+ ]] && exit $status
   VARS_TO_UNSET="$VARS_TO_UNSET LOG_DEST ma args j status VARS_TO_UNSET"

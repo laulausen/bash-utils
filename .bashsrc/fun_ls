@@ -1,12 +1,28 @@
 #!/bin/bash
+
 function ls() {
-  TAG="FUN ls"
-  [ -z "$COLORS_SET" ] && . $BASHSRC/colors
   OLL=$LOG_LEVEL
   LOG_LEVEL=ERROR
 #  LOG_LEVEL=DEBUG
-  log D "args : $@"
+  log D "$FUNCNAME() : ${#@} args : $@"
   VARS_TO_UNSET=""
+  if [ -z ${a_COLORS} ];then
+    a_COLORS=( GRAY RED GREEN YELLOW BLUE PURPURE CYAN WHITE )
+    i=0
+    while [ "$i" -lt 8 ]; do
+      COL=${a_COLORS[$i]}; VAL="'1;9$i'"
+      VAL_="'\033[1;9${i}m'"
+      eval "$COL=$VAL_"
+      COL_B=${COL}_BOLD; VAL_b="0;9$((i+1))"
+      COL_B_="\033["
+      COL_B_="'${COL_B_}${VAL_b}m'"
+      eval "$COL_B=$COL_B_"
+      printf "%d : $VAL_ %s <--> $COL_B_ %s" $i "$COL" "$COL_B"
+      i=$((i+1))
+    done
+    BLACK='\033[0m'
+    VARS_TO_UNSET="$VARS_TO_UNSET GRAY RED GREEN YELLOW BLUE PURPURE CYAN WHITE GRAY_BOLD RED_BOLD GREEN_BOLD YELLOW_BOLD BLUE_BOLD PURPURE_BOLD CYAN_BOLD WHITE_BOLD COL VAL_ COL_B VAL_b COL_B_ BLACK"
+  fi
   args=( $@ )
   _opts=()
   oc=0
@@ -16,74 +32,79 @@ function ls() {
   f_flag=0
   e_flag=0
   al=${#args[@]}
+  VARS_TO_UNSET="$VARS_TO_UNSET args _opts oc _args ac ef f_flag e_flag al arg"
   for arg in ${args[@]}; do
     [ $e_flag -eq 0 ] && log D "e_flag = 0" || log D "e_flag != 0"
     [ $e_flag -eq 0 ] && {
-      log D "no e_flag -> go on"
+      log D "$FUNCNAME() : no e_flag -> go on"
       arg=$(eval "echo -n "$(sed -E -e 's#([A-Z|a-z|_|.|-|/]*)\\\$([A-Z|a-z|_]+)([A-Z|a-z|_|.|-|/]*)##g' <<<$arg)"")
-      log D "arg = $arg"
+      log D "$FUNCNAME() : arg = $arg"
       case "$arg" in
         -f)
-          log D "++ f_flag"
+          log D "ls() : ++ f_flag"
           f_flag=1
-	  ;;
+          ;;
         -c)
-          log D "++ c_flag"
+          log D "ls() : ++ c_flag"
           c_flag=1
           ;;
         -b)
-	  log D "chdir $PWD -> $OLDPWD"
-	  e_flag=$((e_flag+1));
-          log D "++ e_flag -> $e_flag"
-	  cd $OLDPWD
-	  ;;
+          log D "ls() : chdir $PWD -> $OLDPWD"
+          e_flag=$((e_flag+1));
+          log D "ls() : ++ e_flag -> $e_flag"
+          cd $OLDPWD
+          ;;
         -p)
-          log D " ++ p_flag"
-	  p_flag=1
-	  ;;
+          log D " ls() : ++ p_flag"
+          p_flag=1
+          ;;
         -h|--help)
-          printf "${CYAN_BOLD}%s${NONE}${WHITE} usage\n${NONE}" $0
-          printf "${BLUE_BOLD}    %s %s${NONE}${WHITE} : show version${NONE}\n" "$0" "-v"
-          printf "${BLUE_BOLD}    %s %s${NONE}${WHITE} : show this msg${NONE}\n" "$0" "-h"
-          printf "${BLUE_BOLD}    %s <dir> %s${NONE}${WHITE} : equal to cd <dir>${NONE}\n" "$0" "-c"
-          printf "${BLUE_BOLD}    %s <dir> %s${NONE}${WHITE} : cd to last location${NONE}\n" "$0" "-b"
-          printf "${BLUE_BOLD}    %s %s <file> ${NONE}${WHITE} : prints content in case of text${NONE}\n" "$0" "-p"
+          printf "${LIGHT_CYAN}%s${WHITE} usage\n" $0
+          printf "${LIGHT_BLUE}    %s %s${WHITE} : show version\n" "$0" "-v"
+          printf "${LIGHT_BLUE}    %s %s${WHITE} : show this msg\n" "$0" "-h"
+          printf "${LIGHT_BLUE}    %s <dir> %s${WHITE} : equal to cd <dir>\n" "$0" "-c"
+          printf "${LIGHT_BLUE}    %s <dir> %s${WHITE} : cd to last location\n" "$0" "-b"
+          printf "${LIGHT_BLUE}    %s %s <file> ${WHITE} : prints content in case of text\n" "$0" "-p"
           e_flag=1
-	  ;;
+          ;;
         -v|--version)
-          printf "${CYAN_BOLD}%s() ${NONE}${WHITE} from $CORE/bin/aosp_env ${NONE}\n" "$FUNCNAME"
-	  e_flag=$((e_flag+1));
-          log D " ++ e_flag -> $e_flag"
+          printf "${LIGHT_CYAN}%s() ${WHITE} from /ssd_aosp/aosp/bin/aosp_env ${WHITE}\n" "$FUNCNAME"
+          e_flag=$((e_flag+1));
+          log D " ls() : ++ e_flag -> $e_flag"
           ;;
         -*)
-	  _opts[$oc]="${arg}"
-	  log D "$FUNCNAME() opt [$oc] : ++ $arg"
+          _opts[$oc]="${arg}"
+          log D "$FUNCNAME() opt [$oc] : ++ $arg"
           oc=$((oc+1))
           ;;
         *)
           # not the last arg -> wait for more
-	  _args[$ac]="${arg}"
-	  log D "$FUNCNAME() args [$ac] : ++ $arg"
+          _args[$ac]="${arg}"
+          log D "$FUNCNAME() args [$ac] : ++ $arg"
           ac=$((ac+1))
           ;;
       esac
-    } || log D "jump over <- e_flag = $e_flag"
+    } || log D "$FUNCNAME() : jump over <- e_flag = $e_flag"
   done
   arg_list=""
   for a in ${_args[@]}; do arg_list="${arg_list}$a "; done
   log D "ls() args : $arg_list"
+  unset arg_list
+  unset a
   opt_list=""
   for o in ${_opts[@]}; do opt_list="${opt_list}$o "; done
   log D "ls() opts : $opt_list"
-  [ ${#_args[@]} -eq 0 ] && { log D " no dir ->$PWD"; _args[0]=$PWD; }
+  unset opt_list
+  unset o
+  [ ${#_args[@]} -eq 0 ] && { log D " ls() : no dir ->$PWD"; _args[0]=$PWD; }
   # arg is a directory -> ls arg
-  [ $e_flag -gt 0 ] && { e_flag=$((e_flag-1)); log D " -- e_flag -> "$e_flag""; log D " XX _args"; unset _args; }
+  [ $e_flag -gt 0 ] && { e_flag=$((e_flag-1)); log D " ls() : -- e_flag -> "$e_flag""; log D " ls() : XX _args"; unset _args; }
   for _arg in ${_args[@]}; do
-    log D "_arg = $_arg"
+    log D "ls() : _arg = $_arg"
     [ $e_flag -eq 0 ] && {
     if [ -d "$_arg" ]; then
-      log D "arg ist DIR -> ls"
-      log V "/bin/ls --color=always ${_opts[@]} $_arg"
+      log D "ls() : arg ist DIR -> ls"
+      log V "ls() : /bin/ls --color=always ${_opts[@]} $_arg"
       ##########################################
       #               execute     dir          #
       ##########################################
@@ -98,35 +119,35 @@ function ls() {
     ##########################################
     [ -f $_arg ] && {
       type=$(file -b --mime-type "$_arg" | sed 's|/.*||')
-      log D "arg is FILE -> type : $type"
+      log D "ls() : arg is FILE -> type : $type"
       case "$type" in
-	text)
-    		line_count=$(cat $_arg | wc -l)
-    		printf "${WHITE}[ ${NONE}${GREEN_BOLD}${M_TYPE}${NONE}${WHITE} ]  ${NONE}${GREEN_BOLD}L${NONE}${WHITE_BOLD} %s  ${NONE}${GREEN_BOLD}W${NONE}${WHITE_BOLD} %s  ${NONE}${GREEN_BOLD}c${NONE}${WHITE_BOLD} %s :: ${NONE}" $line_count "$(cat $_arg | wc -w)" "$(cat $_arg | wc -m)"
-    		/bin/ls --color=none ${_opts[@]} "$_arg";
-    		[[ "$line_count" -eq 0 ]] && printf "         ${WHITE}%s${NONE}\n" $(cat $_arg);
-		lc=0
-    		while IFS= read -r line; do
-    		  printf " ${GRAY_BOLD}%2d :      ${NONE}${WHITE}%s       ${NONE}\n" $lc "$line"
-    		  lc=$((lc+1))
-    		done < "$_arg";
-		;;
-	   *)
-		if [ $f_flag -eq 1 ]; then
-		  log D " but f flag is set...lets have a look :-)"
-    		  printf "${WHITE}[ ${NONE}${RED_BOLD}BIN?${NONE}${WHITE} ]${NONE} "
-		  /bin/ls --color=always ${_opts[@]} "$_arg";
-  		  while IFS= read -rn1 a; do printf %s "${a:-$'\n'}"; sleep 0.001; done < $_arg;
-		else
-      		  printf "${WHITE}[ ${NONE}${RED_BOLD}BIN${NONE}${WHITE} ] ${NONE}"
-		  /bin/ls --color=always ${_opts[@]} "$_arg";
+        text)
+                line_count=$(cat $_arg | wc -l)
+                printf "${WHITE}[ ${LIGHT_GREEN}${M_TYPE}${WHITE} ]  ${LIGHT_GREEN}L${WHITE_BOLD} %s  ${LIGHT_GREEN}W${WHITE_BOLD} %s  ${LIGHT_GREEN}c${WHITE_BOLD} %s :: " $line_count "$(cat $_arg | wc -w)" "$(cat $_arg | wc -m)"
+                /bin/ls --color=none ${_opts[@]} "$_arg";
+                [[ "$line_count" -eq 0 ]] && printf "         ${WHITE}%s\n" $(cat $_arg);
+                lc=0
+                while IFS= read -r line; do
+                  printf " ${GRAY_BOLD}%2d :      ${WHITE}%s       \n" $lc "$line"
+                  lc=$((lc+1))
+                done < "$_arg";
+                ;;
+           *)
+                if [ $f_flag -eq 1 ]; then
+                  log D " $FUNCNAME() : but f flag is set...lets have a look :-)"
+                  printf "${WHITE}[ ${LIGHT_RED}BIN?${WHITE} ] "
+                  /bin/ls --color=always ${_opts[@]} "$_arg";
+                  while IFS= read -rn1 a; do printf %s "${a:-$'\n'}"; sleep 0.001; done < $_arg;
+                else
+                  printf "${WHITE}[ ${LIGHT_RED}BIN${WHITE} ] "
+                  /bin/ls --color=always ${_opts[@]} "$_arg";
                 fi
-		;;
+                ;;
       esac
     }
   }
   done
-  VARS_TO_UNSET="$VARS_TO_UNSET args _opts oc _args ac ef f_flag e_flag al arg c_flag p_flag arg_list a opt_list type line_count lc r_flag"
+  VARS_TO_UNSET="$VARS_TO_UNSET _arg type r_flag VARS_TO_UNSET"
   for v in $VARS_TO_UNSET; do unset $v; done; unset v;
   LOG_LEVEL=$OLL
 }

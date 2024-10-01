@@ -1,6 +1,6 @@
 #!/bin/bash
+
 function nkill() {
-    TAG="FUN nkill"
     pname="$1"
     pids=""
     pid=""
@@ -17,5 +17,5 @@ function nkill() {
         printf "kill : %s?" "$(for p in "$pids"; do printf "%b " $p; done )";
         read -r a;
         sudo kill -9 $pids 1> /dev/null;
-    } || log W "no matching process found"
+    } || echo "no matching process found"
 }
