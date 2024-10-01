@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd $HOME
-git clone https://raw.githubusercontent.com/laulausen/bash-utils.git
+git clone https://github.com/laulausen/bash-utils.git
 cd bash-utils
 [ -f $HOME/.bashrc ] && cp $HOME/.bashrc $HOME/._bashrc
 cat << "EOF" >> $HOME/.bashrc
