@@ -1,5 +1,0 @@
-#!/bin/bash
-function get_ip() {
-  eval "get_${1}" 2> /dev/null > /dev/null && echo $(eval "get_${1}") || echo ${!1}
-}
-

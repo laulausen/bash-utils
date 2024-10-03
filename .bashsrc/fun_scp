@@ -4,6 +4,7 @@ function scp_to_30() {
         ARGS=( $@ )
         TO_COPY=
         for idx in ${!ARGS[@]}; do [ $idx -eq 1 ] && DEST="${ARGS[$idx]}" || TO_COPY="${ARGS[$idx]} $TO_COPY"; done
+	log I "scp -r "$TO_COPY" jenkins@degamhunav30.eso.local:$DEST"
 	scp -r "$TO_COPY" jenkins@degamhunav30.eso.local:$DEST
 }
 function scp_from_30() {

@@ -1,5 +1,0 @@
-#!/bin/bash
-function get_oi() {
-  [[ "$oi" =~ ^[0-9]+$ ]] && oi=192.168.178.$oi
-  echo $oi
-}
